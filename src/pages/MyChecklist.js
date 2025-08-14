@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+// No need to import useNavigate or react-router-dom
 
 const MyChecklist = () => {
   const { user } = useAuth();
@@ -10,19 +10,16 @@ const MyChecklist = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     if (user) fetchChecklist();
   }, [user]);
-
 
   const fetchChecklist = async () => {
     try {
       setLoading(true);
       const userId = user?._id || user?.id;
       const res = await checklistAPI.get(userId);
-      console.log('Checklist API get response:', res.data);
       setChecklist(res.data.items || []);
     } catch (err) {
       setChecklist([]);
@@ -154,19 +151,23 @@ const MyChecklist = () => {
               Explore our curated collections and build your personalized itinerary.
             </p>
             <div className="space-x-4">
-              {/* Use useNavigate for navigation instead of window.location.href */}
-              <button
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                onClick={() => navigate('/attractions')}
+              {/* Use <a> tag with href for navigation, will refresh the page, but no extra dependency required */}
+              <a
+                href="/attractions"
+                className="inline-block"
               >
-                Browse Attractions
-              </button>
-              <button
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-                onClick={() => navigate('/restaurants')}
+                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                  Browse Attractions
+                </button>
+              </a>
+              <a
+                href="/restaurants"
+                className="inline-block"
               >
-                Find Restaurants
-              </button>
+                <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                  Find Restaurants
+                </button>
+              </a>
             </div>
           </div>
         ) : (
