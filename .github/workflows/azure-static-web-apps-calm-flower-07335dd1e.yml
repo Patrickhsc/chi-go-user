@@ -4,18 +4,12 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened, closed]
     branches: [ main ]
-
-#（可选）避免多个部署并发相互覆盖
-concurrency:
-  group: swa-${{ github.ref }}
-  cancel-in-progress: true
+    types: [ opened, synchronize, reopened, closed ]
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,17 +22,16 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # 关键：让 CRA 不把 eslint 警告当作错误
-      - name: Build app
+      - name: Build app (CI=false to ignore warnings)
         run: npm run build
         env:
           CI: "false"
 
-      # 只负责上传发布（跳过 Oryx 再次构建）
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "upload"
-          app_location: "/"          # 代码在仓库根目录
-          output_location: "build_
+          app_location: "/"
+          output_location: "build"
+          skip_app_build: true
