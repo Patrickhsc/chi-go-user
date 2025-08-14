@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Set baseURL to Flask backend for all API calls
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api'; // Set baseURL to Flask backend for all API calls
 
 const api = axios.create({
   baseURL: API_BASE_URL,
