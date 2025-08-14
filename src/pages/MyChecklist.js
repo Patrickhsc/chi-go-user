@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 const MyChecklist = () => {
   const { user } = useAuth();
@@ -9,6 +10,7 @@ const MyChecklist = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     if (user) fetchChecklist();
@@ -152,15 +154,16 @@ const MyChecklist = () => {
               Explore our curated collections and build your personalized itinerary.
             </p>
             <div className="space-x-4">
+              {/* Use useNavigate for navigation instead of window.location.href */}
               <button
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                onClick={() => window.location.href = '/attractions'}
+                onClick={() => navigate('/attractions')}
               >
                 Browse Attractions
               </button>
               <button
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-                onClick={() => window.location.href = '/restaurants'}
+                onClick={() => navigate('/restaurants')}
               >
                 Find Restaurants
               </button>
