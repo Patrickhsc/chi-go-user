@@ -22,18 +22,16 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # 关键：让 CRA 在 CI 环境下不把 warning 当错误
+      # 关键：避免 CRA 在 CI 下把 warning 当错误
       - name: Build app (CI=false)
         run: npm run build
         env:
           CI: "false"
 
-      # 只上传我们已经构建好的目录
+      # 直接上传 build 目录作为站点
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "upload"
-          app_location: "/"               # 源码所在目录
-          app_artifact_location: "build"  # ← 成品目录（重点）
-          skip_app_build: true            # 跳过 Oryx 再构建
+          app_location: "build"   # ← 这里指向构建产物目录
