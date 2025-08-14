@@ -1,4 +1,4 @@
-name: Deploy CRA to Azure Static Web Apps
+name: Deploy CRA User to Azure Static Web Apps
 
 on:
   push:
@@ -22,16 +22,15 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # 关键：避免 CRA 在 CI 下把 warning 当错误
-      - name: Build app (CI=false)
+      - name: Build app (CI=false) and inject API base
         run: npm run build
         env:
           CI: "false"
+          REACT_APP_API_BASE: ${{ vars.API_BASE_URL }}
 
-      # 直接上传 build 目录作为站点
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "upload"
-          app_location: "build"   # ← 这里指向构建产物目录
+          app_location: "build"
