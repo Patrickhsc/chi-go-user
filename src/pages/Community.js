@@ -1,14 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Eye, Calendar } from "react-feather";
 import { useAuth } from "../components/AuthContext";
 
 const DEFAULT_AVATAR =
   "https://ui-avatars.com/api/?name=User&background=bbb&color=fff";
 
+// Utility to format date
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   return date.toLocaleDateString();
+}
+
+// Simple Calendar and Eye SVGs (inline, accessible)
+function CalendarIcon({ className }) {
+  return (
+    <svg className={className} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor"/>
+      <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor"/>
+    </svg>
+  );
+}
+function EyeIcon({ className }) {
+  return (
+    <svg className={className} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
 }
 
 const Community = () => {
@@ -74,7 +92,7 @@ const Community = () => {
                         {post.username ? post.username : "User"}
                       </span>
                       <span className="flex items-center text-sm text-gray-500">
-                        <Calendar size={12} className="mr-1" />
+                        <CalendarIcon className="mr-1" />
                         {formatDate(post.created_at || post.createdAt)}
                       </span>
                     </div>
@@ -83,7 +101,7 @@ const Community = () => {
                     onClick={() => openPostDetail(post)}
                     className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
                   >
-                    <Eye size={14} />
+                    <EyeIcon />
                     <span>View Details</span>
                   </button>
                 </div>
