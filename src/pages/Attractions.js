@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, MapPin } from 'lucide-react';
 import GoogleMap from '../components/GoogleMap';
@@ -11,16 +12,14 @@ const Attractions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   const getAttractionId = (attraction) => attraction._id || attraction.id || `${attraction.name}_${attraction.category}`;
 
   const fetchAttractions = async () => {
     try {
       setLoading(true);
       const response = await attractionsAPI.getAll();
-      const activeAttractions = Array.isArray(response.data)
-        ? response.data.filter(item => item.is_active)
-        : [];
-      setAttractions(activeAttractions);
+      setAttractions(response.data);
     } catch (err) {
       setError('Failed to load attractions');
       setAttractions([]);
@@ -82,6 +81,7 @@ const Attractions = () => {
       setLoading(false);
     }
   };
+
 
   // Remove an attraction from the checklist using the backend API (same as Restaurants page)
   const removeFromChecklist = async (attraction) => {
