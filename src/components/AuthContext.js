@@ -17,23 +17,30 @@ export const AuthProvider = ({ children }) => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   const login = async (credentials) => {
-    setLoading(true);
-    try {
-      const response = await authAPI.login(credentials);
-      const userData = normalizeUser(response.data);
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
-      };
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const response = await authAPI.login(credentials);
+    const userData = normalizeUser(response.data);
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    // Add this block for more user-friendly error message
+    let errorMsg = 'Login failed';
+    if (error.response?.status === 401 || error.response?.status === 400) {
+      errorMsg = 'Invalid username or password.';
+    } else if (error.response?.data?.message) {
+      errorMsg = error.response.data.message;
     }
-  };
+    return { 
+      success: false, 
+      error: errorMsg
+    };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const register = async (userData) => {
     setLoading(true);
