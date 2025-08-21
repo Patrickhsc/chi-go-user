@@ -184,14 +184,6 @@ const Login = ({ setCurrentPage }) => {
             </div>
           </form>
 
-          {/* Demo Info */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
-            <ul className="text-xs text-gray-600 space-y-1">
-              <li>• Regular User: any username + any password</li>
-              <li>• Admin User: username "admin" + any password</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
