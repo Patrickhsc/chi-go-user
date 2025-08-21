@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Utensils, Eye } from 'lucide-react';
+import { User, Calendar, MapPin, Utensils, Eye } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI } from '../services/api';
-
-const DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=bbb&color=fff";
 
 const Community = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
+  // Like feature removed
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     fetchPosts();
+  // Like feature removed
   }, []);
 
   const fetchPosts = async () => {
@@ -29,6 +29,9 @@ const Community = () => {
     }
   };
 
+  // Like feature removed
+
+  // Fix date formatting: handle undefined/null/invalid
   const formatDate = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -88,11 +91,7 @@ const Community = () => {
         
         {posts.length === 0 ? (
           <div className="text-center py-16">
-            <img
-              src={DEFAULT_AVATAR}
-              alt="User"
-              className="w-12 h-12 rounded-full mx-auto mb-4 bg-gray-200"
-            />
+            <User size={48} className="text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts yet</h3>
             <p className="text-gray-600">Be the first to share your Chicago trip!</p>
           </div>
@@ -104,12 +103,9 @@ const Community = () => {
                 <div className="p-6 pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <img
-                        src={post.avatar || DEFAULT_AVATAR}
-                        alt={post.username || "User"}
-                        className="w-10 h-10 rounded-full object-cover bg-gray-200"
-                        onError={e => { e.target.src = DEFAULT_AVATAR; }}
-                      />
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <User size={20} className="text-white" />
+                      </div>
                       {/* Username and date next to avatar */}
                       <div className="flex flex-col">
                         <span className="font-semibold text-gray-900">{post.username ? post.username : 'User'}</span>
@@ -167,13 +163,14 @@ const Community = () => {
                 </div>
 
                 {/* Post Footer */}
-                <div className="px-6 py-4 bg-gray-50 border-t">
-                  <div className="flex items-center justify-end">
-                    <div className="text-sm text-gray-500">
-                      {post.checklist.length} places • {post.checklist.filter(item => item.itemType === 'attraction').length} attractions • {post.checklist.filter(item => item.itemType === 'restaurant').length} restaurants
+                  {/* Post Footer: only show checklist summary, no like button */}
+                  <div className="px-6 py-4 bg-gray-50 border-t">
+                    <div className="flex items-center justify-end">
+                      <div className="text-sm text-gray-500">
+                        {post.checklist.length} places • {post.checklist.filter(item => item.itemType === 'attraction').length} attractions • {post.checklist.filter(item => item.itemType === 'restaurant').length} restaurants
+                      </div>
                     </div>
                   </div>
-                </div>
          
               </article>
             ))}
