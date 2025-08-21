@@ -1,102 +1,170 @@
-import React, { useState } from "react";
-import { useAuth } from "./AuthContext";
+import React, { useState } from 'react';
+import { User, LogOut } from 'lucide-react';
+import { useAuth } from './AuthContext';
 
-const DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=bbb&color=fff";
-
-function Header({ currentPage, setCurrentPage }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+const Header = ({ currentPage, setCurrentPage }) => {
   const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { label: "Home", key: "home" },
-    { label: "Attractions", key: "attractions" },
-    { label: "Restaurants", key: "restaurants" },
-    { label: "Community", key: "community" },
-    { label: "My Checklist", key: "checklist" },
-  ];
+  const handleLogout = () => {
+    logout();
+    setCurrentPage('home');
+    setMobileMenuOpen(false);
+  };
+
+  const handleNav = (page) => {
+    setCurrentPage(page);
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <header className="bg-white shadow-md">
-      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-        <div className="text-2xl font-bold text-blue-600 cursor-pointer select-none" onClick={() => setCurrentPage("home")}>
-          Chi-Go
-        </div>
-        {/* Hamburger for mobile */}
-        <button
-          className="md:hidden block text-gray-700"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-        {/* Desktop navigation */}
-        <nav className="hidden md:flex space-x-6">
-          {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setCurrentPage(item.key)}
-              className={`py-2 px-3 rounded transition-colors duration-200 ${
-                currentPage === item.key
-                  ? "text-blue-600 font-semibold border-b-2 border-blue-600"
-                  : "text-gray-700 hover:text-blue-500"
-              }`}
+    <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <h1 
+              className="text-2xl font-bold text-blue-600 cursor-pointer hover:text-blue-700 transition-colors" 
+              onClick={() => handleNav('home')}
             >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        {/* User avatar and info */}
-        <div className="flex items-center space-x-2 ml-4">
-          <img
-            src={user?.avatar || DEFAULT_AVATAR}
-            alt="User avatar"
-            className="w-10 h-10 rounded-full object-cover bg-gray-100"
-            onError={e => { e.target.src = DEFAULT_AVATAR; }}
-          />
-          {user && (
-            <>
-              <span className="text-gray-700 whitespace-nowrap">Hello, {user.username}</span>
+              Chi-Go
+            </h1>
+          </div>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-8">
+            {['home', 'attractions', 'restaurants', 'community', 'checklist'].map((page) => (
               <button
-                onClick={logout}
-                className="text-gray-700 hover:text-blue-600 flex items-center ml-1"
-                title="Logout"
-              >
-                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"/>
-                </svg>
-                <span className="ml-0.5">Logout</span>
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden px-4 pb-3">
-          <nav className="flex flex-col space-y-2">
-            {navItems.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => {
-                  setCurrentPage(item.key);
-                  setMenuOpen(false);
-                }}
-                className={`py-2 px-3 rounded text-left w-full ${
-                  currentPage === item.key
-                    ? "bg-blue-50 text-blue-600 font-semibold"
-                    : "text-gray-700 hover:bg-blue-100"
+                key={page}
+                onClick={() => handleNav(page)}
+                className={`capitalize px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  currentPage === page 
+                    ? 'text-blue-600 border-blue-600' 
+                    : 'text-gray-700 hover:text-blue-600 border-transparent hover:border-gray-300'
                 }`}
               >
-                {item.label}
+                {page === 'checklist' ? 'My Checklist' : page}
               </button>
             ))}
+            {user && user.role === 'admin' && (
+              <button
+                onClick={() => handleNav('admin')}
+                className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  currentPage === 'admin' 
+                    ? 'text-red-600 border-red-600' 
+                    : 'text-red-700 hover:text-red-600 border-transparent hover:border-red-300'
+                }`}
+              >
+                Admin Panel
+              </button>
+            )}
           </nav>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          {/* User section */}
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User size={16} className="text-blue-600" />
+                  </div>
+                  <span className="text-sm text-gray-700 hidden sm:block">
+                    Hello, {user.username}
+                  </span>
+                  {user.role === 'admin' && (
+                    <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                      Admin
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 text-sm text-gray-600 hover:text-red-600 transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span className="hidden sm:block">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleNav('login')}
+                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100"
+              >
+                <User size={16} />
+                <span>Login</span>
+              </button>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Mobile Navigation Dropdown */}
+      {mobileMenuOpen && (
+        <nav className="md:hidden bg-white border-b shadow-sm px-4 py-4 absolute top-16 left-0 w-full z-50">
+          <div className="flex flex-col space-y-2">
+            {['home', 'attractions', 'restaurants', 'community', 'checklist'].map((page) => (
+              <button
+                key={page}
+                onClick={() => handleNav(page)}
+                className={`capitalize text-left px-3 py-2 text-sm font-medium transition-colors border-l-4 ${
+                  currentPage === page 
+                    ? 'text-blue-600 border-blue-600 bg-blue-50' 
+                    : 'text-gray-700 hover:text-blue-600 border-transparent hover:bg-gray-50'
+                }`}
+              >
+                {page === 'checklist' ? 'My Checklist' : page}
+              </button>
+            ))}
+            {user && user.role === 'admin' && (
+              <button
+                onClick={() => handleNav('admin')}
+                className={`text-left px-3 py-2 text-sm font-medium transition-colors border-l-4 ${
+                  currentPage === 'admin' 
+                    ? 'text-red-600 border-red-600 bg-red-50' 
+                    : 'text-red-700 hover:text-red-600 border-transparent hover:bg-red-50'
+                }`}
+              >
+                Admin Panel
+              </button>
+            )}
+            <div className="pt-4 border-t mt-2">
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleNav('login')}
+                  className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <User size={16} />
+                  <span>Login</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </nav>
       )}
     </header>
   );
-}
+};
 
 export default Header;
