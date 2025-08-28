@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 // Base URL for backend (used for relative image paths)
 const API_BASE = process.env.REACT_APP_API_BASE || "";
@@ -13,8 +12,6 @@ const MyChecklist = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate(); // Initialize useNavigate hook
 
   // Fetch checklist items when user changes
   useEffect(() => {
@@ -125,7 +122,8 @@ const MyChecklist = () => {
           <p className="text-gray-600 mb-4">You need to login to view your checklist.</p>
           <button
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            onClick={() => navigate('/login')} // Navigate to login page when clicked
+            // Use native browser navigation, works everywhere, no dependency
+            onClick={() => { window.location.href = '/login'; }}
           >
             Go to Login
           </button>
