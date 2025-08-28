@@ -4,12 +4,14 @@ import { useAuth } from '../components/AuthContext';
 import { communityAPI } from '../services/api';
 
 const Community = () => {
-  const { user } = useAuth ? useAuth() : { user: null };
+  // 正确写法：无条件调用 Hook
+  const authContext = typeof useAuth === 'function' ? useAuth() : { user: null };
+  const { user } = authContext;
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
-  
 
   useEffect(() => {
     fetchPosts();
