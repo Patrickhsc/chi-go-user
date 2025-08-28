@@ -4,9 +4,8 @@ import { useAuth } from '../components/AuthContext';
 import { communityAPI } from '../services/api';
 
 const Community = () => {
-  // 正确写法：无条件调用 Hook
-  const authContext = typeof useAuth === 'function' ? useAuth() : { user: null };
-  const { user } = authContext;
+
+  const { user } = useAuth() || { user: null };
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
