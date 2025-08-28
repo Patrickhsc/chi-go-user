@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 // Base URL for backend (used for relative image paths)
 const API_BASE = process.env.REACT_APP_API_BASE || "";
@@ -13,11 +14,14 @@ const MyChecklist = () => {
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+  // Fetch checklist items when user changes
   useEffect(() => {
     if (user) fetchChecklist();
   }, [user]);
 
-  // Fetch user's checklist from backend
+  // Fetch the user's checklist from the backend
   const fetchChecklist = async () => {
     try {
       setLoading(true);
@@ -32,7 +36,7 @@ const MyChecklist = () => {
     }
   };
 
-  // Remove an item from checklist
+  // Remove an item from the checklist
   const removeFromChecklist = async (itemId, itemType) => {
     try {
       setLoading(true);
@@ -46,7 +50,7 @@ const MyChecklist = () => {
     }
   };
 
-  // Share checklist as a community post
+  // Share the checklist as a community post
   const handleShare = async () => {
     if (!user) {
       alert('Please login to share your checklist');
@@ -89,7 +93,7 @@ const MyChecklist = () => {
     }
   };
 
-  // Group checklist by itemType (attraction, restaurant)
+  // Group checklist items by their type (e.g., attraction, restaurant)
   const groupedChecklist = checklist.reduce((acc, item) => {
     if (!acc[item.itemType]) {
       acc[item.itemType] = [];
@@ -98,7 +102,7 @@ const MyChecklist = () => {
     return acc;
   }, {});
 
-  // Format added date
+  // Format the date an item was added
   const formatDate = (dateString) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -112,13 +116,17 @@ const MyChecklist = () => {
     }
   };
 
+  // If user is not logged in, show a prompt to login and a button to navigate to login page
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Please Login</h2>
           <p className="text-gray-600 mb-4">You need to login to view your checklist.</p>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            onClick={() => navigate('/login')} // Navigate to login page when clicked
+          >
             Go to Login
           </button>
         </div>
@@ -126,10 +134,11 @@ const MyChecklist = () => {
     );
   }
 
+  // Main checklist page rendering
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header section */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Trip Checklist</h1>
@@ -148,7 +157,7 @@ const MyChecklist = () => {
           )}
         </div>
 
-        {/* Empty State */}
+        {/* Empty state if checklist is empty */}
         {checklist.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-6">
@@ -186,7 +195,7 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* ✅ Image handling (absolute URL, relative path, fallback) */}
+                          {/* Display image, use fallback if not provided or fails to load */}
                           <img 
                             src={
                               item.image
@@ -244,7 +253,7 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* ✅ Same image logic for restaurants */}
+                          {/* Display image, use fallback if not provided or fails to load */}
                           <img 
                             src={
                               item.image
@@ -292,7 +301,7 @@ const MyChecklist = () => {
           </div>
         )}
 
-        {/* Share Modal */}
+        {/* Share Modal for sharing trip checklist */}
         {showShareModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
@@ -302,7 +311,7 @@ const MyChecklist = () => {
               </p>
               
               <div className="space-y-4">
-                {/* Trip Title */}
+                {/* Trip Title input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trip Title *
@@ -317,7 +326,7 @@ const MyChecklist = () => {
                   />
                 </div>
                 
-                {/* Trip Description */}
+                {/* Trip Description input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
@@ -335,7 +344,7 @@ const MyChecklist = () => {
                   </div>
                 </div>
 
-                {/* Preview */}
+                {/* Preview of selected checklist items */}
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
                   <div className="flex flex-wrap gap-1">
@@ -352,7 +361,7 @@ const MyChecklist = () => {
                   </div>
                 </div>
                 
-                {/* Modal Actions */}
+                {/* Modal action buttons */}
                 <div className="flex space-x-3 pt-4">
                   <button
                     onClick={() => setShowShareModal(false)}
