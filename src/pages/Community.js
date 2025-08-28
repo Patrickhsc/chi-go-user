@@ -9,6 +9,7 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
+  
 
   useEffect(() => {
     fetchPosts();
