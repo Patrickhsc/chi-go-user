@@ -4,34 +4,30 @@ import { useAuth } from '../components/AuthContext';
 import { communityAPI } from '../services/api';
 
 const Community = () => {
-  const { user } = useAuth();
+  const { user } = useAuth ? useAuth() : { user: null };
   const [posts, setPosts] = useState([]);
-  // Like feature removed
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     fetchPosts();
-  // Like feature removed
+    // eslint-disable-next-line
   }, []);
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await communityAPI.getPosts();
-      setPosts(response.data);
+      setPosts(Array.isArray(response?.data) ? response.data : []);
     } catch (err) {
-      console.error('Error fetching posts:', err);
       setError('Failed to load community posts');
     } finally {
       setLoading(false);
     }
   };
 
-  // Like feature removed
-
-  // Fix date formatting: handle undefined/null/invalid
   const formatDate = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -43,13 +39,8 @@ const Community = () => {
     });
   };
 
-  const openPostDetail = (post) => {
-    setSelectedPost(post);
-  };
-
-  const closePostDetail = () => {
-    setSelectedPost(null);
-  };
+  const openPostDetail = (post) => setSelectedPost(post);
+  const closePostDetail = () => setSelectedPost(null);
 
   if (loading) {
     return (
@@ -89,7 +80,7 @@ const Community = () => {
           </p>
         </div>
         
-        {posts.length === 0 ? (
+        {(!posts || posts.length === 0) ? (
           <div className="text-center py-16">
             <User size={48} className="text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts yet</h3>
@@ -98,17 +89,16 @@ const Community = () => {
         ) : (
           <div className="space-y-6">
             {posts.map((post) => (
-              <article key={post._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                {/* Post Header: avatar, username, and date in a row */}
+              <article key={post._id || post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {/* Post Header */}
                 <div className="p-6 pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <User size={20} className="text-white" />
                       </div>
-                      {/* Username and date next to avatar */}
                       <div className="flex flex-col">
-                        <span className="font-semibold text-gray-900">{post.username ? post.username : 'User'}</span>
+                        <span className="font-semibold text-gray-900">{post.username || 'User'}</span>
                         <span className="flex items-center text-sm text-gray-500">
                           <Calendar size={12} className="mr-1" />
                           {formatDate(post.created_at || post.createdAt)}
@@ -131,10 +121,10 @@ const Community = () => {
                 {/* Checklist Preview */}
                 <div className="px-6 pb-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {post.checklist.slice(0, 4).map((item, index) => (
+                    {(post.checklist || []).slice(0, 4).map((item, index) => (
                       <div key={index} className="bg-gray-50 rounded-lg p-3 text-center">
                         <img 
-                          src={item.image} 
+                          src={item.image}
                           alt={item.name}
                           className="w-full h-16 object-cover rounded-lg mb-2"
                           onError={(e) => {
@@ -155,7 +145,7 @@ const Community = () => {
                       </div>
                     ))}
                   </div>
-                  {post.checklist.length > 4 && (
+                  {(post.checklist || []).length > 4 && (
                     <p className="text-center text-sm text-gray-500 mt-3">
                       +{post.checklist.length - 4} more places
                     </p>
@@ -163,15 +153,13 @@ const Community = () => {
                 </div>
 
                 {/* Post Footer */}
-                  {/* Post Footer: only show checklist summary, no like button */}
-                  <div className="px-6 py-4 bg-gray-50 border-t">
-                    <div className="flex items-center justify-end">
-                      <div className="text-sm text-gray-500">
-                        {post.checklist.length} places • {post.checklist.filter(item => item.itemType === 'attraction').length} attractions • {post.checklist.filter(item => item.itemType === 'restaurant').length} restaurants
-                      </div>
+                <div className="px-6 py-4 bg-gray-50 border-t">
+                  <div className="flex items-center justify-end">
+                    <div className="text-sm text-gray-500">
+                      {(post.checklist || []).length} places • {(post.checklist || []).filter(item => item.itemType === 'attraction').length} attractions • {(post.checklist || []).filter(item => item.itemType === 'restaurant').length} restaurants
                     </div>
                   </div>
-         
+                </div>
               </article>
             ))}
           </div>
@@ -185,8 +173,7 @@ const Community = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">{selectedPost.title}</h2>
-                    {/* Show 'by username' or fallback to 'User' */}
-                    <p className="text-gray-600 mt-1">by {selectedPost.username ? selectedPost.username : 'User'}</p>
+                    <p className="text-gray-600 mt-1">by {selectedPost.username || 'User'}</p>
                   </div>
                   <button
                     onClick={closePostDetail}
@@ -202,10 +189,10 @@ const Community = () => {
                 
                 <h3 className="text-lg font-semibold mb-4">Complete Itinerary</h3>
                 <div className="space-y-3">
-                  {selectedPost.checklist.map((item, index) => (
+                  {(selectedPost.checklist || []).map((item, index) => (
                     <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                       <img 
-                        src={item.image} 
+                        src={item.image}
                         alt={item.name}
                         className="w-12 h-12 object-cover rounded-lg"
                         onError={(e) => {
