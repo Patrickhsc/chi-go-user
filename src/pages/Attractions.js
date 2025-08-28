@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, MapPin } from 'lucide-react';
 import GoogleMap from '../components/GoogleMap';
 import { attractionsAPI, checklistAPI } from '../services/api';
 import { useAuth } from '../components/AuthContext';
+
+// Read backend API base URL from environment
+const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 const Attractions = () => {
   const { user } = useAuth();
@@ -12,9 +14,10 @@ const Attractions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
+  // Helper to get attraction id
   const getAttractionId = (attraction) => attraction._id || attraction.id || `${attraction.name}_${attraction.category}`;
 
+  // Fetch all attractions from backend
   const fetchAttractions = async () => {
     try {
       setLoading(true);
@@ -28,6 +31,7 @@ const Attractions = () => {
     }
   };
 
+  // Fetch checklist for the current user
   const fetchChecklist = async () => {
     if (!user) return;
     try {
@@ -51,11 +55,13 @@ const Attractions = () => {
     // eslint-disable-next-line
   }, [user]);
 
+  // Check if attraction is in checklist
   const isInChecklist = (attraction) => {
     const aid = getAttractionId(attraction);
     return checklist.some(item => item.itemId === aid && item.itemType === 'attraction');
   };
 
+  // Add attraction to checklist
   const addToChecklist = async (attraction) => {
     if (!user) {
       alert('Please login to add to your checklist');
@@ -82,8 +88,7 @@ const Attractions = () => {
     }
   };
 
-
-  // Remove an attraction from the checklist using the backend API (same as Restaurants page)
+  // Remove attraction from checklist
   const removeFromChecklist = async (attraction) => {
     if (!user) return;
     try {
@@ -140,8 +145,20 @@ const Attractions = () => {
               <div key={getAttractionId(attraction)} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="flex">
                   <div className="flex-shrink-0">
+                    {/* 
+                      Show image:
+                      - If full URL, use as is
+                      - If relative path, prepend API_BASE
+                      - If empty or error, fallback to a default image 
+                    */}
                     <img 
-                      src={attraction.image} 
+                      src={
+                        attraction.image
+                          ? (attraction.image.startsWith("http")
+                              ? attraction.image
+                              : API_BASE + attraction.image)
+                          : 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=300&h=300&fit=crop'
+                      } 
                       alt={attraction.name}
                       className="w-32 h-32 object-cover"
                       onError={(e) => {
