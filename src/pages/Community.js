@@ -4,24 +4,31 @@ import { useAuth } from '../components/AuthContext';
 import { communityAPI } from '../services/api';
 
 const Community = () => {
-
+  // Get the logged-in user from the AuthContext
   const { user } = useAuth() || { user: null };
 
+  // State to store community posts
   const [posts, setPosts] = useState([]);
+  // Loading state for initial fetch
   const [loading, setLoading] = useState(true);
+  // Error state to show any fetch errors
   const [error, setError] = useState(null);
+  // State for currently selected post (for modal display)
   const [selectedPost, setSelectedPost] = useState(null);
 
+  // Fetch posts when component mounts
   useEffect(() => {
     fetchPosts();
     // eslint-disable-next-line
   }, []);
 
+  // Async function to fetch posts from API
   const fetchPosts = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await communityAPI.getPosts();
+      // Ensure posts is an array
       setPosts(Array.isArray(response?.data) ? response.data : []);
     } catch (err) {
       setError('Failed to load community posts');
@@ -30,6 +37,7 @@ const Community = () => {
     }
   };
 
+  // Format date string into readable format
   const formatDate = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -41,9 +49,12 @@ const Community = () => {
     });
   };
 
+  // Set selected post to show modal
   const openPostDetail = (post) => setSelectedPost(post);
+  // Close modal
   const closePostDetail = () => setSelectedPost(null);
 
+  // Show loading spinner while fetching posts
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -55,6 +66,7 @@ const Community = () => {
     );
   }
 
+  // Show error message if fetch failed
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -71,9 +83,11 @@ const Community = () => {
     );
   }
 
+  // Main render
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Community Trips</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -82,6 +96,7 @@ const Community = () => {
           </p>
         </div>
         
+        {/* Show message if there are no posts */}
         {(!posts || posts.length === 0) ? (
           <div className="text-center py-16">
             <User size={48} className="text-gray-400 mx-auto mb-4" />
@@ -90,12 +105,14 @@ const Community = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Render each post card */}
             {posts.map((post) => (
               <article key={post._id || post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Post Header */}
                 <div className="p-6 pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
+                      {/* User avatar */}
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <User size={20} className="text-white" />
                       </div>
@@ -107,6 +124,7 @@ const Community = () => {
                         </span>
                       </div>
                     </div>
+                    {/* Button to view post details */}
                     <button
                       onClick={() => openPostDetail(post)}
                       className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
@@ -115,21 +133,23 @@ const Community = () => {
                       <span>View Details</span>
                     </button>
                   </div>
-
+                  {/* Post title and description */}
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h2>
                   <p className="text-gray-700 mb-4 leading-relaxed">{post.description}</p>
                 </div>
 
-                {/* Checklist Preview */}
+                {/* Checklist Preview (show first 4 items) */}
                 <div className="px-6 pb-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {(post.checklist || []).slice(0, 4).map((item, index) => (
                       <div key={index} className="bg-gray-50 rounded-lg p-3 text-center">
+                        {/* Checklist item image */}
                         <img 
                           src={item.image}
                           alt={item.name}
                           className="w-full h-16 object-cover rounded-lg mb-2"
                           onError={(e) => {
+                            // Show default image if loading fails
                             e.target.src = item.itemType === 'restaurant' 
                               ? 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=100&h=100&fit=crop'
                               : 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=100&h=100&fit=crop';
@@ -137,6 +157,7 @@ const Community = () => {
                         />
                         <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                         <div className="flex items-center justify-center mt-1">
+                          {/* Icon depending on type */}
                           {item.itemType === 'restaurant' ? (
                             <Utensils size={10} className="text-green-600 mr-1" />
                           ) : (
@@ -147,6 +168,7 @@ const Community = () => {
                       </div>
                     ))}
                   </div>
+                  {/* Show more count if checklist is long */}
                   {(post.checklist || []).length > 4 && (
                     <p className="text-center text-sm text-gray-500 mt-3">
                       +{post.checklist.length - 4} more places
@@ -154,7 +176,7 @@ const Community = () => {
                   )}
                 </div>
 
-                {/* Post Footer */}
+                {/* Post Footer with summary */}
                 <div className="px-6 py-4 bg-gray-50 border-t">
                   <div className="flex items-center justify-end">
                     <div className="text-sm text-gray-500">
@@ -167,7 +189,7 @@ const Community = () => {
           </div>
         )}
 
-        {/* Post Detail Modal */}
+        {/* Modal for viewing post details */}
         {selectedPost && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
@@ -177,6 +199,7 @@ const Community = () => {
                     <h2 className="text-2xl font-bold text-gray-900">{selectedPost.title}</h2>
                     <p className="text-gray-600 mt-1">by {selectedPost.username || 'User'}</p>
                   </div>
+                  {/* Close modal button */}
                   <button
                     onClick={closePostDetail}
                     className="text-gray-400 hover:text-gray-600"
@@ -187,8 +210,10 @@ const Community = () => {
                   </button>
                 </div>
                 
+                {/* Post description */}
                 <p className="text-gray-700 mb-6">{selectedPost.description}</p>
                 
+                {/* Show complete itinerary */}
                 <h3 className="text-lg font-semibold mb-4">Complete Itinerary</h3>
                 <div className="space-y-3">
                   {(selectedPost.checklist || []).map((item, index) => (
@@ -198,6 +223,7 @@ const Community = () => {
                         alt={item.name}
                         className="w-12 h-12 object-cover rounded-lg"
                         onError={(e) => {
+                          // Show default image on error
                           e.target.src = item.itemType === 'restaurant' 
                             ? 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=100&h=100&fit=crop'
                             : 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=100&h=100&fit=crop';
@@ -226,4 +252,5 @@ const Community = () => {
   );
 };
 
+// Export the component as default
 export default Community;
