@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
-// No need to import useNavigate or react-router-dom
+
+// Define API_BASE from environment variable for backend image path handling
+const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 const MyChecklist = () => {
   const { user } = useAuth();
@@ -84,6 +86,7 @@ const MyChecklist = () => {
     }
   };
 
+  // Group checklist by itemType for display
   const groupedChecklist = checklist.reduce((acc, item) => {
     if (!acc[item.itemType]) {
       acc[item.itemType] = [];
@@ -92,6 +95,7 @@ const MyChecklist = () => {
     return acc;
   }, {});
 
+  // Format date helper
   const formatDate = (dateString) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -184,8 +188,15 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
+                          {/* Display image with both absolute and relative path support */}
                           <img 
-                            src={item.image} 
+                            src={
+                              item.image
+                                ? (item.image.startsWith("http")
+                                    ? item.image
+                                    : API_BASE + item.image)
+                                : 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=100&h=100&fit=crop'
+                            }
                             alt={item.name}
                             className="w-16 h-16 object-cover rounded-lg"
                             onError={(e) => {
@@ -235,8 +246,15 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
+                          {/* Display image with both absolute and relative path support */}
                           <img 
-                            src={item.image} 
+                            src={
+                              item.image
+                                ? (item.image.startsWith("http")
+                                    ? item.image
+                                    : API_BASE + item.image)
+                                : 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=100&h=100&fit=crop'
+                            }
                             alt={item.name}
                             className="w-16 h-16 object-cover rounded-lg"
                             onError={(e) => {
