@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
-import { useNavigate } from 'react-router-dom'; // ✅ Import for navigation
 
-// Base URL for backend (used when image path is relative)
+// Base URL for backend (used for relative image paths)
 const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 const MyChecklist = () => {
   const { user } = useAuth();
-  const navigate = useNavigate(); // ✅ Hook for navigation
   const [checklist, setChecklist] = useState([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
@@ -19,7 +17,7 @@ const MyChecklist = () => {
     if (user) fetchChecklist();
   }, [user]);
 
-  // Fetch checklist for the logged-in user
+  // Fetch user's checklist from backend
   const fetchChecklist = async () => {
     try {
       setLoading(true);
@@ -91,7 +89,7 @@ const MyChecklist = () => {
     }
   };
 
-  // Group checklist items by type
+  // Group checklist by itemType (attraction, restaurant)
   const groupedChecklist = checklist.reduce((acc, item) => {
     if (!acc[item.itemType]) {
       acc[item.itemType] = [];
@@ -100,7 +98,7 @@ const MyChecklist = () => {
     return acc;
   }, {});
 
-  // Format date helper
+  // Format added date
   const formatDate = (dateString) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -114,18 +112,13 @@ const MyChecklist = () => {
     }
   };
 
-  // Case: User not logged in
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Please Login</h2>
           <p className="text-gray-600 mb-4">You need to login to view your checklist.</p>
-          {/* ✅ Navigate to /login page when clicked */}
-          <button 
-            onClick={() => navigate('/login')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-          >
+          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
             Go to Login
           </button>
         </div>
@@ -193,7 +186,7 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* ✅ Unified image handling */}
+                          {/* ✅ Image handling (absolute URL, relative path, fallback) */}
                           <img 
                             src={
                               item.image
@@ -251,6 +244,7 @@ const MyChecklist = () => {
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
+                          {/* ✅ Same image logic for restaurants */}
                           <img 
                             src={
                               item.image
@@ -308,7 +302,7 @@ const MyChecklist = () => {
               </p>
               
               <div className="space-y-4">
-                {/* Title Input */}
+                {/* Trip Title */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trip Title *
@@ -323,7 +317,7 @@ const MyChecklist = () => {
                   />
                 </div>
                 
-                {/* Description Input */}
+                {/* Trip Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
@@ -358,7 +352,7 @@ const MyChecklist = () => {
                   </div>
                 </div>
                 
-                {/* Actions */}
+                {/* Modal Actions */}
                 <div className="flex space-x-3 pt-4">
                   <button
                     onClick={() => setShowShareModal(false)}
