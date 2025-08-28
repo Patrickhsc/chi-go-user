@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Share2, Trash2, MapPin, Calendar, Utensils } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { communityAPI, checklistAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom'; // ✅ Import for navigation
 
-// Define API_BASE from environment variable for backend image path handling
+// Base URL for backend (used when image path is relative)
 const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 const MyChecklist = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // ✅ Hook for navigation
   const [checklist, setChecklist] = useState([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ title: '', description: '' });
@@ -17,6 +19,7 @@ const MyChecklist = () => {
     if (user) fetchChecklist();
   }, [user]);
 
+  // Fetch checklist for the logged-in user
   const fetchChecklist = async () => {
     try {
       setLoading(true);
@@ -31,6 +34,7 @@ const MyChecklist = () => {
     }
   };
 
+  // Remove an item from checklist
   const removeFromChecklist = async (itemId, itemType) => {
     try {
       setLoading(true);
@@ -44,6 +48,7 @@ const MyChecklist = () => {
     }
   };
 
+  // Share checklist as a community post
   const handleShare = async () => {
     if (!user) {
       alert('Please login to share your checklist');
@@ -86,7 +91,7 @@ const MyChecklist = () => {
     }
   };
 
-  // Group checklist by itemType for display
+  // Group checklist items by type
   const groupedChecklist = checklist.reduce((acc, item) => {
     if (!acc[item.itemType]) {
       acc[item.itemType] = [];
@@ -109,13 +114,18 @@ const MyChecklist = () => {
     }
   };
 
+  // Case: User not logged in
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Please Login</h2>
           <p className="text-gray-600 mb-4">You need to login to view your checklist.</p>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          {/* ✅ Navigate to /login page when clicked */}
+          <button 
+            onClick={() => navigate('/login')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
             Go to Login
           </button>
         </div>
@@ -126,6 +136,7 @@ const MyChecklist = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Trip Checklist</h1>
@@ -144,6 +155,7 @@ const MyChecklist = () => {
           )}
         </div>
 
+        {/* Empty State */}
         {checklist.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-6">
@@ -155,19 +167,12 @@ const MyChecklist = () => {
               Explore our curated collections and build your personalized itinerary.
             </p>
             <div className="space-x-4">
-              {/* Use <a> tag with href for navigation, will refresh the page, but no extra dependency required */}
-              <a
-                href="/attractions"
-                className="inline-block"
-              >
+              <a href="/attractions" className="inline-block">
                 <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                   Browse Attractions
                 </button>
               </a>
-              <a
-                href="/restaurants"
-                className="inline-block"
-              >
+              <a href="/restaurants" className="inline-block">
                 <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
                   Find Restaurants
                 </button>
@@ -184,11 +189,11 @@ const MyChecklist = () => {
                   Attractions ({groupedChecklist.attraction.length})
                 </h2>
                 <div className="grid gap-4">
-                  {groupedChecklist.attraction.map((item, index) => (
+                  {groupedChecklist.attraction.map((item) => (
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* Display image with both absolute and relative path support */}
+                          {/* ✅ Unified image handling */}
                           <img 
                             src={
                               item.image
@@ -242,11 +247,10 @@ const MyChecklist = () => {
                   Restaurants ({groupedChecklist.restaurant.length})
                 </h2>
                 <div className="grid gap-4">
-                  {groupedChecklist.restaurant.map((item, index) => (
+                  {groupedChecklist.restaurant.map((item) => (
                     <div key={`${item.itemId}-${item.itemType}`} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* Display image with both absolute and relative path support */}
                           <img 
                             src={
                               item.image
@@ -304,6 +308,7 @@ const MyChecklist = () => {
               </p>
               
               <div className="space-y-4">
+                {/* Title Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trip Title *
@@ -318,6 +323,7 @@ const MyChecklist = () => {
                   />
                 </div>
                 
+                {/* Description Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
@@ -335,6 +341,7 @@ const MyChecklist = () => {
                   </div>
                 </div>
 
+                {/* Preview */}
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
                   <div className="flex flex-wrap gap-1">
@@ -351,6 +358,7 @@ const MyChecklist = () => {
                   </div>
                 </div>
                 
+                {/* Actions */}
                 <div className="flex space-x-3 pt-4">
                   <button
                     onClick={() => setShowShareModal(false)}
