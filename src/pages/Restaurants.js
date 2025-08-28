@@ -4,6 +4,9 @@ import GoogleMap from '../components/GoogleMap';
 import { restaurantsAPI, checklistAPI } from '../services/api';
 import { useAuth } from '../components/AuthContext';
 
+// Read backend API base URL from environment
+const API_BASE = process.env.REACT_APP_API_BASE || "";
+
 const Restaurants = () => {
   const { user } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
@@ -11,12 +14,8 @@ const Restaurants = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  
-  // 保证 itemId 一定有值，优先 _id、id，否则用 name+cuisine 兜底
-  // Ensure itemId is always present: prefer _id, then id, fallback to name_cuisine
   const getRestaurantId = (restaurant) => restaurant._id || restaurant.id || `${restaurant.name}_${restaurant.cuisine}`;
 
-  
   const fetchRestaurants = async () => {
     try {
       setLoading(true);
@@ -30,7 +29,6 @@ const Restaurants = () => {
     }
   };
 
-  
   const fetchChecklist = async () => {
     if (!user) return;
     try {
@@ -54,14 +52,11 @@ const Restaurants = () => {
     // eslint-disable-next-line
   }, [user]);
 
-
   const isInChecklist = (restaurant) => {
     const rid = getRestaurantId(restaurant);
     return checklist.some(item => item.itemId === rid && item.itemType === 'restaurant');
   };
 
-  // 用 add_to_user_checklist (POST, json body)
-  // Add a restaurant to the checklist using the backend API
   const addToChecklist = async (restaurant) => {
     if (!user) {
       alert('Please login to add to your checklist');
@@ -88,8 +83,6 @@ const Restaurants = () => {
     }
   };
 
-  // 用 remove_from_user_checklist (DELETE, json body)
-  // Remove a restaurant from the checklist using the backend API
   const removeFromChecklist = async (restaurant) => {
     if (!user) return;
     try {
@@ -146,8 +139,15 @@ const Restaurants = () => {
               <div key={getRestaurantId(restaurant)} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="flex">
                   <div className="flex-shrink-0">
+                    {/* ✅ 显示逻辑跟 Attractions 保持一致 */}
                     <img 
-                      src={restaurant.image} 
+                      src={
+                        restaurant.image
+                          ? (restaurant.image.startsWith("http")
+                              ? restaurant.image
+                              : API_BASE + restaurant.image)
+                          : 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&h=300&fit=crop'
+                      } 
                       alt={restaurant.name}
                       className="w-32 h-32 object-cover"
                       onError={(e) => {
